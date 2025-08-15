@@ -31,20 +31,20 @@ export const ExpensePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-900 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 页面头部 */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">家庭费用管理</h1>
-              <p className="mt-2 text-sm text-gray-600">
+              <h1 className="text-3xl font-bold text-white">家庭费用管理</h1>
+              <p className="mt-2 text-sm text-gray-300">
                 查看和管理家庭费用支出记录
               </p>
             </div>
             <div className="flex items-center space-x-4">
               {lastUpdated && (
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-400">
                   最后更新: {lastUpdated.toLocaleString('zh-CN')}
                 </div>
               )}

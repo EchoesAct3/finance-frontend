@@ -39,6 +39,13 @@ const getIndentStyle = (column: string): React.CSSProperties => {
 	return {};
 };
 
+const getCellAlignment = (column: string): string => {
+	const key = column.toLowerCase();
+	if (key === 'amount') return 'expense-table-cell-right';
+	if (key === 'payment_date') return 'expense-table-cell-center';
+	return 'expense-table-cell-left';
+};
+
 export const ExpenseTable: React.FC<ExpenseTableProps> = ({ data, loading, error }) => {
 	const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number; offsetX: number } | null>(null);
 
@@ -150,7 +157,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ data, loading, error
 								{columns.map((column, colIndex) => {
 									const isComment = column.toLowerCase() === 'comment';
 									const cellValue = formatCellValue(column, (row as any)[column]);
-									const cellClass = `expense-table-cell ${getColumnAlignment(column)} ${isComment ? 'expense-table-cell-truncate' : ''}`;
+									const cellClass = `expense-table-cell ${getCellAlignment(column)} ${isComment ? 'expense-table-cell-truncate' : ''}`;
 									
 									return (
 										<div
