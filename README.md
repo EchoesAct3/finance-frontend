@@ -1,46 +1,137 @@
-# Getting Started with Create React App
+# Finance Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+家庭の財務支出記録を管理するためのWebアプリケーションです。
 
-## Available Scripts
+## 機能
 
-In the project directory, you can run:
+- 📊 Excelスタイルの費用支出テーブル表示
+- 💰 現金・デジタル支払いの色分け表示
+- 📅 日付フォーマット（YYYY-MM-DD）
+- 💵 金額の会計形式表示（カンマ区切り）
+- 💬 コメント列のツールチップ機能
+- 🎨 カスタムCSSスタイリングシステム
+- 📱 レスポンシブデザイン
 
-### `npm start`
+## 技術スタック
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### フロントエンド
+- **React 19** - UIライブラリ
+- **TypeScript** - 型安全な開発
+- **Vite** - 高速なビルドツール
+- **Tailwind CSS** - ユーティリティファーストCSSフレームワーク
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### バックエンド
+- **Express.js** - Node.js Webフレームワーク
+- **MySQL2** - MySQLデータベース接続
+- **CORS** - クロスオリジンリクエスト対応
 
-### `npm test`
+## プロジェクト構造
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+finance-frontend/
+├── src/
+│   ├── components/          # Reactコンポーネント
+│   │   └── ExpenseTable.tsx # 費用テーブルコンポーネント
+│   ├── pages/               # ページコンポーネント
+│   │   └── ExpensePage.tsx  # メインページ
+│   ├── services/            # APIサービス
+│   │   └── databaseService.ts
+│   ├── styles/              # スタイルファイル
+│   │   ├── common.css       # 共通スタイル
+│   │   └── README.md        # スタイル使用ガイド
+│   └── main.tsx             # アプリケーションエントリーポイント
+├── server.js                # Express.jsサーバー
+├── vite.config.ts           # Vite設定
+└── tailwind.config.js       # Tailwind CSS設定
+```
 
-### `npm run build`
+## セットアップ
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 前提条件
+- Node.js (v18以上)
+- MySQL データベース
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### インストール
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **リポジトリをクローン**
+```bash
+git clone https://github.com/EchoesAct3/finance-frontend.git
+cd finance-frontend
+```
 
-### `npm run eject`
+2. **依存関係をインストール**
+```bash
+npm install
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+3. **データベース設定**
+`server.js`ファイルでMySQL接続情報を設定：
+```javascript
+const dbConfig = {
+  host: '127.0.0.1',
+  port: 3306,
+  database: 'family_finances',
+  user: 'root',
+  password: 'your_password'
+};
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 実行方法
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### 開発モード（フロントエンド + バックエンド）
+```bash
+npm run dev:full
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### 個別実行
 
-## Learn More
+**フロントエンドのみ**
+```bash
+npm run dev
+```
+- URL: http://localhost:5173
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+**バックエンドのみ**
+```bash
+npm run server
+```
+- URL: http://localhost:3001
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 本番ビルド
+```bash
+npm run build
+```
+
+## API エンドポイント
+
+- `GET /api/expenses` - 費用データの取得
+- `GET /api/health` - サーバー健康チェック
+
+## スタイリングシステム
+
+プロジェクトには統一されたスタイリングシステムが含まれています：
+
+- **共通CSS変数** - 色やサイズの統一
+- **コンポーネントスタイル** - テーブル、ボタン、カード等
+- **レスポンシブデザイン** - モバイル対応
+- **アニメーション** - スムーズなUI効果
+
+詳細は `src/styles/README.md` を参照してください。
+
+## 開発者向け情報
+
+### データベースビュー
+このアプリケーションは `family_finances.tmnt_expenses_view` ビューを使用します。
+
+### カスタマイズ
+- テーブル列の表示/非表示は `ExpenseTable.tsx` で設定
+- スタイルの変更は `src/styles/common.css` で管理
+- 色の変更はCSS変数で統一管理
+
+## ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。
+
+## 貢献
+
+プルリクエストやイシューの報告を歓迎します。
