@@ -120,72 +120,70 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ data, loading, error
 	}
 
 	return (
-		<div className="expense-table">
-			<div className="bg-white">
-				{/* 表头 */}
-				<div className="expense-table-header">
-					<div
-						className="expense-table-grid"
-					>
-						{columns.map((column, index) => (
-							<div
-								key={column}
-								className={`expense-table-header-cell ${getColumnAlignment(column)}`}
-								style={{ ...getIndentStyle(column) }}
-							>
-								{column}
-							</div>
-						))}
-					</div>
+		<div className="expense-table-container">
+			{/* 固定表头 */}
+			<div className="expense-table-header-fixed">
+				<div
+					className="expense-table-grid"
+				>
+					{columns.map((column, index) => (
+						<div
+							key={column}
+							className={`expense-table-header-cell ${getColumnAlignment(column)}`}
+							style={{ ...getIndentStyle(column) }}
+						>
+							{column}
+						</div>
+					))}
 				</div>
+			</div>
 
-				{/* 内容 */}
-				<div className="expense-table-body">
-					{data.map((row, rowIndex) => {
-						const sourceVal = (row as any)['SOURCE'] ?? (row as any)['source'] ?? (row as any)['Source'];
-						const source = typeof sourceVal === 'string' ? sourceVal.toLowerCase() : '';
-						const rowClass = source === 'cash' ? 'expense-table-row expense-table-row-cash' : 
-										 source === 'digital' ? 'expense-table-row expense-table-row-digital' : 
-										 'expense-table-row expense-table-row-default';
-						
-						return (
-							<div
-								key={rowIndex}
-								className={rowClass}
-								style={{ gridTemplateColumns: gridTemplateColumns }}
-							>
-								{columns.map((column, colIndex) => {
-									const isComment = column.toLowerCase() === 'comment';
-									const cellValue = formatCellValue(column, (row as any)[column]);
-									const cellClass = `expense-table-cell ${getCellAlignment(column)} ${isComment ? 'expense-table-cell-truncate' : ''}`;
-									
-									return (
-										<div
-											key={`${rowIndex}-${column}`}
-											className={cellClass}
-											style={{ ...getIndentStyle(column) }}
-											onMouseEnter={(e) => {
-												if (isComment) {
-													const el = e.currentTarget as HTMLDivElement;
-													const isOverflow = el.scrollWidth > el.clientWidth;
-													if (isOverflow) {
-														const rect = el.getBoundingClientRect();
-														setTooltip({ text: cellValue, x: rect.left + rect.width / 2, y: rect.top - 10, offsetX: rect.width / 4 });
-													} else {
-														setTooltip(null);
-													}
+			{/* 可滚动内容区域 */}
+			<div className="expense-table-content-scrollable">
+				{data.map((row, rowIndex) => {
+					const sourceVal = (row as any)['SOURCE'] ?? (row as any)['source'] ?? (row as any)['Source'];
+					const source = typeof sourceVal === 'string' ? sourceVal.toLowerCase() : '';
+					const rowClass = source === 'cash' ? 'expense-table-row expense-table-row-cash' : 
+									 source === 'digital' ? 'expense-table-row expense-table-row-digital' : 
+									 'expense-table-row expense-table-row-default';
+					
+					return (
+						<div
+							key={rowIndex}
+							className={rowClass}
+							style={{ gridTemplateColumns: gridTemplateColumns }}
+						>
+							{columns.map((column, colIndex) => {
+								const isComment = column.toLowerCase() === 'comment';
+								const cellValue = formatCellValue(column, (row as any)[column]);
+								const cellClass = `expense-table-cell ${getCellAlignment(column)} ${isComment ? 'expense-table-cell-truncate' : ''}`;
+								
+								return (
+									<div
+										key={`${rowIndex}-${column}`}
+										className={cellClass}
+										style={{ ...getIndentStyle(column) }}
+										onMouseEnter={(e) => {
+											if (isComment) {
+												const el = e.currentTarget as HTMLDivElement;
+												const isOverflow = el.scrollWidth > el.clientWidth;
+												if (isOverflow) {
+													const rect = el.getBoundingClientRect();
+													setTooltip({ text: cellValue, x: rect.left + rect.width / 2, y: rect.top - 10, offsetX: rect.width / 4 });
+												} else {
+													setTooltip(null);
 												}
-											}}
-											onMouseLeave={() => { if (isComment) setTooltip(null); }}
-										>
-											{cellValue}
-										</div>
-									);
-								})}
-							</div>
-						);
-					})}
-				</div>
+											}
+										}}
+										onMouseLeave={() => { if (isComment) setTooltip(null); }}
+									>
+										{cellValue}
+									</div>
+								);
+							})}
+						</div>
+					);
+				})}
 			</div>
 
 			{/* Tooltip */}
