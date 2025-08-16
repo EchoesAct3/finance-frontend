@@ -1,22 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ExpenseTable } from '../components/ExpenseTable';
-import { DatabaseService, type ExpenseData } from '../services/databaseService';
+import { MonthlyExpenseTable } from '../components/MonthlyExpenseTable';
+import { DatabaseService, type MonthlyExpenseData } from '../services/databaseService';
 import { getCurrentLanguage, setLanguagePreference, getSupportedLanguages, translatePageText } from '../utils/columnTranslations';
 
-export const ExpensePage: React.FC = () => {
-  const [data, setData] = useState<ExpenseData[]>([]);
+export const MonthlyExpensePage: React.FC = () => {
+  const [data, setData] = useState<MonthlyExpenseData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState(getCurrentLanguage());
   const [showHealthCheck, setShowHealthCheck] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState<string>('2025-08'); // 默认选择2025年8月
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const expensesData = await DatabaseService.getExpensesData();
-      setData(expensesData);
+      const monthlyExpensesData = await DatabaseService.getMonthlyExpensesData(selectedMonth);
+      setData(monthlyExpensesData);
       setLastUpdated(new Date());
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载数据时发生未知错误');
@@ -27,7 +28,7 @@ export const ExpensePage: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [selectedMonth]);
 
   const handleRefresh = () => {
     loadData();
@@ -38,6 +39,10 @@ export const ExpensePage: React.FC = () => {
     setCurrentLanguage(language);
   };
 
+  const handleMonthChange = (month: string) => {
+    setSelectedMonth(month);
+  };
+
   // 计算总金额
   const totalAmount = useMemo(() => {
     return data.reduce((sum, item) => {
@@ -46,6 +51,19 @@ export const ExpensePage: React.FC = () => {
     }, 0);
   }, [data]);
 
+  // 生成月份选项（最近12个月）
+  const monthOptions = useMemo(() => {
+    const options = [];
+    const currentDate = new Date();
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthLabel = `${date.getFullYear()}年${date.getMonth() + 1}月`;
+      options.push({ value: monthKey, label: monthLabel });
+    }
+    return options;
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-900 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,47 +71,65 @@ export const ExpensePage: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white">{translatePageText('PAGE_TITLE', currentLanguage)}</h1>
+              <h1 className="text-3xl font-bold text-white">月度费用管理</h1>
               <p className="mt-2 text-sm text-gray-300">
-                {translatePageText('PAGE_SUBTITLE', currentLanguage)}
+                查看和管理月度费用支出记录
               </p>
             </div>
             <div className="flex items-center space-x-4">
-                             {/* 语言切换 */}
-               <div className="language-selector">
-                 <span className="language-selector-label">{translatePageText('LANGUAGE_LABEL', currentLanguage)}</span>
-                 <select
-                   value={currentLanguage}
-                   onChange={(e) => handleLanguageChange(e.target.value)}
-                   className="language-selector-dropdown"
-                 >
-                   {Object.entries(getSupportedLanguages()).map(([code, name]) => (
-                     <option key={code} value={code} className="language-selector-option">
-                       {name}
-                     </option>
-                   ))}
-                 </select>
-               </div>
+              {/* 月份选择器 */}
+              <div className="month-selector">
+                <span className="month-selector-label text-gray-300">月份:</span>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => handleMonthChange(e.target.value)}
+                  className="month-selector-dropdown"
+                >
+                  {monthOptions.map((option) => (
+                    <option key={option.value} value={option.value} className="month-selector-option">
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 语言切换 */}
+              <div className="language-selector">
+                <span className="language-selector-label">{translatePageText('LANGUAGE_LABEL', currentLanguage)}</span>
+                <select
+                  value={currentLanguage}
+                  onChange={(e) => handleLanguageChange(e.target.value)}
+                  className="language-selector-dropdown"
+                >
+                  {Object.entries(getSupportedLanguages()).map(([code, name]) => (
+                    <option key={code} value={code} className="language-selector-option">
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               
-                             {lastUpdated && (
-                 <div className="text-sm text-gray-400">
-                   {translatePageText('LAST_UPDATED', currentLanguage)} {lastUpdated.toLocaleString('zh-CN')}
-                 </div>
-               )}
-                             <button
-                 onClick={() => setShowHealthCheck(!showHealthCheck)}
-                 className="health-check-toggle"
-               >
-                 <svg className="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                 </svg>
-                                   {showHealthCheck ? translatePageText('HIDE_STATS', currentLanguage) : translatePageText('SHOW_STATS', currentLanguage)}
-               </button>
-               <button
-                 onClick={handleRefresh}
-                 disabled={loading}
-                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-               >
+              {lastUpdated && (
+                <div className="text-sm text-gray-400">
+                  {translatePageText('LAST_UPDATED', currentLanguage)} {lastUpdated.toLocaleString('zh-CN')}
+                </div>
+              )}
+              
+              <button
+                onClick={() => setShowHealthCheck(!showHealthCheck)}
+                className="health-check-toggle"
+              >
+                <svg className="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                {showHealthCheck ? translatePageText('HIDE_STATS', currentLanguage) : translatePageText('SHOW_STATS', currentLanguage)}
+              </button>
+              
+              <button
+                onClick={handleRefresh}
+                disabled={loading}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 {loading ? (
                   <>
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -115,8 +151,8 @@ export const ExpensePage: React.FC = () => {
           </div>
         </div>
 
-                 {/* 数据统计卡片 */}
-         {data.length > 0 && showHealthCheck && (
+        {/* 数据统计卡片 */}
+        {data.length > 0 && showHealthCheck && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="p-5">
@@ -174,26 +210,26 @@ export const ExpensePage: React.FC = () => {
               </div>
             </div>
           </div>
-                 )}
+        )}
 
-         {/* 合计金额行 */}
-         {data.length > 0 && (
-           <div className="summary-row">
-             <div className="summary-row-header">
-               <div className="summary-row-content">
-                 <div className="summary-row-label">{translatePageText('TOTAL_AMOUNT', currentLanguage)}</div>
-                 <div className="summary-row-value">
-                   ¥{totalAmount.toLocaleString('en-US')}
-                 </div>
-               </div>
-             </div>
-           </div>
-         )}
+        {/* 合计金额行 */}
+        {data.length > 0 && (
+          <div className="summary-row">
+            <div className="summary-row-header">
+              <div className="summary-row-content">
+                <div className="summary-row-label">{translatePageText('TOTAL_AMOUNT', currentLanguage)}</div>
+                <div className="summary-row-value">
+                  ¥{totalAmount.toLocaleString('en-US')}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-         {/* 数据表格 */}
+        {/* 数据表格 */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <ExpenseTable data={data} loading={loading} error={error} />
+            <MonthlyExpenseTable data={data} loading={loading} error={error} />
           </div>
         </div>
       </div>

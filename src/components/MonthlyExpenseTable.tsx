@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import type { ExpenseData } from '../services/databaseService';
+import type { MonthlyExpenseData } from '../services/databaseService';
 import { translateColumnName } from '../utils/columnTranslations';
 
-interface ExpenseTableProps {
-	data: ExpenseData[];
+interface MonthlyExpenseTableProps {
+	data: MonthlyExpenseData[];
 	loading: boolean;
 	error: string | null;
 }
@@ -47,7 +47,7 @@ const getCellAlignment = (column: string): string => {
 	return 'expense-table-cell-left';
 };
 
-export const ExpenseTable: React.FC<ExpenseTableProps> = ({ data, loading, error }) => {
+export const MonthlyExpenseTable: React.FC<MonthlyExpenseTableProps> = ({ data, loading, error }) => {
 	const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number; offsetX: number } | null>(null);
 
 	const columns = useMemo(() => {
@@ -111,7 +111,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ data, loading, error
 					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
 				</svg>
 				<h3 className="mt-2 text-sm font-medium text-gray-900">暂无数据</h3>
-				<p className="mt-1 text-sm text-gray-500">没有找到费用记录</p>
+				<p className="mt-1 text-sm text-gray-500">没有找到月度费用记录</p>
 			</div>
 		);
 	}
@@ -176,11 +176,26 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ data, loading, error
 												const originalValue = (row as any)[column];
 												const fullText = String(originalValue || '');
 												
+												console.log('Comment cell hover:', { 
+													scrollWidth: el.scrollWidth, 
+													clientWidth: el.clientWidth, 
+													isOverflow, 
+													cellValue: cellValue.substring(0, 50) + '...',
+													fullText: fullText.substring(0, 50) + '...'
+												});
 												if (isOverflow) {
 													const rect = el.getBoundingClientRect();
 													// 修正tooltip位置计算
 													const tooltipX = rect.left + (rect.width / 2);
 													const tooltipY = rect.top - 5;
+													
+													console.log('Tooltip positioning:', {
+														rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+														tooltipX,
+														tooltipY,
+														column: column,
+														isComment: isComment
+													});
 													
 													setTooltip({ 
 														text: fullText, 
@@ -188,6 +203,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ data, loading, error
 														y: tooltipY, 
 														offsetX: rect.width / 4 
 													});
+													console.log('Tooltip set:', { x: tooltipX, y: tooltipY, fullText: fullText.substring(0, 50) + '...' });
 												} else {
 													setTooltip(null);
 												}
@@ -225,6 +241,15 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ data, loading, error
 				if (top < 50) { // 如果太靠近顶部，显示在下方
 					top = tooltip.y + 30;
 				}
+				
+				console.log('Tooltip rendering:', { 
+					originalX: tooltip.x, 
+					originalY: tooltip.y, 
+					adjustedLeft: left, 
+					adjustedTop: top,
+					windowWidth: window.innerWidth,
+					text: tooltip.text.substring(0, 50) + '...'
+				});
 				
 				return (
 					<div
